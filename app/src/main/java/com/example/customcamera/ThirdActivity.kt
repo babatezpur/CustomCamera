@@ -28,11 +28,17 @@ class ThirdActivity : AppCompatActivity() {
     private lateinit var timerProgressBar: ProgressBar
 
 
+<<<<<<< HEAD
 
     private var camera: Camera? = null
 
 
 
+=======
+    private var camera: Camera? = null
+
+
+>>>>>>> 6a46fcf (Done with first and second screen)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_third)
@@ -137,4 +143,8 @@ class ThirdActivity : AppCompatActivity() {
 //        timerProgressBar.progress = secondsRemaining.toInt()
 //    }
 
+<<<<<<< HEAD
+=======
+    }
+>>>>>>> 6a46fcf (Done with first and second screen)
 }

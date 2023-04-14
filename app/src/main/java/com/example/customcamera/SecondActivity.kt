@@ -47,6 +47,10 @@ class SecondActivity : AppCompatActivity(), SurfaceHolder.Callback, Camera.Pictu
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_second)
 
+<<<<<<< HEAD
+=======
+        supportActionBar?.title = "Taking single photo"
+>>>>>>> 6a46fcf (Done with first and second screen)
 
         surfaceView = findViewById(R.id.surface_view)
         progressBar = findViewById(R.id.progress_bar)
