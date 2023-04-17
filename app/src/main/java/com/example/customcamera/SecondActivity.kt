@@ -120,6 +120,7 @@ class SecondActivity : AppCompatActivity(), SurfaceHolder.Callback, Camera.Pictu
             val parameters = camera?.parameters
             parameters?.set("iso", "100")
             parameters?.focusMode = Camera.Parameters.FOCUS_MODE_FIXED
+            parameters?.setRotation(90)
             camera?.parameters = parameters
             camera?.setPreviewDisplay(surfaceHolder)
             camera?.startPreview()
@@ -194,11 +195,11 @@ class SecondActivity : AppCompatActivity(), SurfaceHolder.Callback, Camera.Pictu
         }
     }
 
-    //Function to start timer. Has two callback methods:
+    //Function to start the timer. Has two callback methods:
     //onTick: gets called after every interval
     //onFinish: gets called after the timer has completed the countdown.
     private fun startTimer() {
-        val totalTime = 11000L // 60 seconds
+        val totalTime = 301000L // 300 seconds, 5 minutes
         val interval = 5000L // 5 seconds
         countDownTimer = object : CountDownTimer(totalTime, interval) {
             override fun onTick(millisUntilFinished: Long) {

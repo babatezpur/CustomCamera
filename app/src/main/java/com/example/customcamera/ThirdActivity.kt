@@ -34,7 +34,7 @@ class ThirdActivity : AppCompatActivity(), SurfaceHolder.Callback, Camera.Pictur
     private lateinit var testStatusText: TextView
     private var camera: Camera? = null
     private lateinit var pictureDirectory: File
-    private var currentExposureValue = -1
+    private var currentExposureValue = -12
     private lateinit var parameters : Camera.Parameters
 
 
@@ -47,7 +47,7 @@ class ThirdActivity : AppCompatActivity(), SurfaceHolder.Callback, Camera.Pictur
         surfaceHolder = surfaceView.holder
         surfaceHolder.addCallback(this)
 
-        supportActionBar?.title = "Taking multplie photos"
+        supportActionBar?.title = "Taking multiple photos"
 
 
 
@@ -76,7 +76,7 @@ class ThirdActivity : AppCompatActivity(), SurfaceHolder.Callback, Camera.Pictur
         camera?.parameters = parameters
         camera?.setPreviewDisplay(surfaceHolder)
         camera?.startPreview()
-        if (currentExposureValue > 1) {
+        if (currentExposureValue > 12) {
             // All images captured, send closest to mean exposure value to backend
             Log.d(TAG,"All pictures captures, calling sendClosestImage()")
             sendClosestImage()
