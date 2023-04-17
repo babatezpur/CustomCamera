@@ -25,6 +25,7 @@ import java.util.*
 
 class SecondActivity : AppCompatActivity(), SurfaceHolder.Callback, Camera.PictureCallback {
 
+    private val TAG : String = "SecondActivity"
     private lateinit var surfaceView: SurfaceView
     private lateinit var surfaceHolder: SurfaceHolder
     private lateinit var progressBar: ProgressBar
@@ -38,7 +39,7 @@ class SecondActivity : AppCompatActivity(), SurfaceHolder.Callback, Camera.Pictu
     private var timerRunnable: Runnable? = null
     private var timerSeconds = 300
     private lateinit var percentTextview : TextView
-
+    private val currentExposureValue = 0
     private val REQUEST_CAMERA_PERMISSION_CODE = 1
 
 
@@ -47,10 +48,7 @@ class SecondActivity : AppCompatActivity(), SurfaceHolder.Callback, Camera.Pictu
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_second)
 
-<<<<<<< HEAD
-=======
         supportActionBar?.title = "Taking single photo"
->>>>>>> 6a46fcf (Done with first and second screen)
 
         surfaceView = findViewById(R.id.surface_view)
         progressBar = findViewById(R.id.progress_bar)
@@ -66,11 +64,13 @@ class SecondActivity : AppCompatActivity(), SurfaceHolder.Callback, Camera.Pictu
 
     }
 
+
+    //Callback functions for SurfaceHolder
     override fun surfaceCreated(holder: SurfaceHolder) {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
             == PackageManager.PERMISSION_GRANTED
         ) {
-            println("surface created")
+            Log.d(TAG,"Surface created")
             startCamera()
         } else {
             ActivityCompat.requestPermissions(
@@ -82,10 +82,11 @@ class SecondActivity : AppCompatActivity(), SurfaceHolder.Callback, Camera.Pictu
     }
 
     override fun surfaceChanged(holder: SurfaceHolder, format: Int, width: Int, height: Int) {
-        //Does nothing...
+        Log.d(TAG,"Surface changed")
     }
 
     override fun surfaceDestroyed(holder: SurfaceHolder) {
+        Log.d(TAG,"Surface destroyed")
         stopCamera()
     }
 
@@ -110,20 +111,20 @@ class SecondActivity : AppCompatActivity(), SurfaceHolder.Callback, Camera.Pictu
         }
     }
 
+
+    //Function to set the camera configs and capture the image.
     private fun startCamera() {
-        println("start camera entered")
         try {
-            println("start camera entered2")
+            Log.d(TAG,"Starting Camera (open)")
             camera = Camera.open()
             val parameters = camera?.parameters
             parameters?.set("iso", "100")
-            parameters?.focusMode = Camera.Parameters.FOCUS_MODE_AUTO
+            parameters?.focusMode = Camera.Parameters.FOCUS_MODE_FIXED
             camera?.parameters = parameters
             camera?.setPreviewDisplay(surfaceHolder)
             camera?.startPreview()
             camera?.autoFocus { success, camera ->
                 if (success) {
-                    println("take pixture called")
                     camera.takePicture(null, null, this)
                 } else {
                     Toast.makeText(
@@ -135,7 +136,7 @@ class SecondActivity : AppCompatActivity(), SurfaceHolder.Callback, Camera.Pictu
                 }
             }
         } catch (e: Exception) {
-            Log.e("MainActivity", "Failed to open camera: ${e.message}")
+            Log.e(TAG, "Failed to open camera: ${e.message}")
             Toast.makeText(this, "Failed to open camera", Toast.LENGTH_SHORT).show()
             finish()
         }
@@ -149,15 +150,15 @@ class SecondActivity : AppCompatActivity(), SurfaceHolder.Callback, Camera.Pictu
     }
 
 
-
+    //Callback function which is called right after the takePicture function. It calls...
+    //...the getOutputMediaFile and once it recieves the File objects, stores the image in it.
     override fun onPictureTaken(data: ByteArray?, camera: Camera?) {
         if (data == null) {
             Toast.makeText(this, "Unable to capture image", Toast.LENGTH_SHORT).show()
             finish()
             return
         }
-
-        println("Inside onpictaken")
+        stopCamera()
         val pictureFile = getOutputMediaFile()
         if (pictureFile == null) {
             Toast.makeText(
@@ -173,10 +174,9 @@ class SecondActivity : AppCompatActivity(), SurfaceHolder.Callback, Camera.Pictu
             val fos = FileOutputStream(pictureFile)
             fos.write(data)
             fos.close()
-            println("pic saved")
-            Log.d("MainActivity", "Image saved to: ${pictureFile.absolutePath}")
+            Log.d(TAG, "Image saved to: ${pictureFile.absolutePath}")
 
-            val uri = Uri.fromFile(pictureFile)
+            //val uri = Uri.fromFile(pictureFile)
             MediaScannerConnection.scanFile(
                 this,
                 arrayOf(pictureFile.toString()),
@@ -184,66 +184,43 @@ class SecondActivity : AppCompatActivity(), SurfaceHolder.Callback, Camera.Pictu
                 null
             )
             statusTextView.text = "Image Captured"
-            println("About to start timer")
+            Log.d(TAG,"Starting Timer")
             startTimer()
 
         } catch (e: Exception) {
-            Log.e("MainActivity", "Failed to save image: ${e.message}")
+            Log.e(TAG, "Failed to save image: ${e.message}")
             Toast.makeText(this, "Failed to save image", Toast.LENGTH_SHORT).show()
             finish()
         }
     }
 
+    //Function to start timer. Has two callback methods:
+    //onTick: gets called after every interval
+    //onFinish: gets called after the timer has completed the countdown.
     private fun startTimer() {
-        val totalTime = 301000L // 60 seconds
-        val interval = 5000L // 1 second
+        val totalTime = 11000L // 60 seconds
+        val interval = 5000L // 5 seconds
         countDownTimer = object : CountDownTimer(totalTime, interval) {
             override fun onTick(millisUntilFinished: Long) {
                 // Update the circular timer and progress bar
                 val progress = ((totalTime - millisUntilFinished) / interval).toInt()
                 timerProgressBar.progress = progress
 
-
-
                 val secondsRemaining = millisUntilFinished / 1000
                 updateCircularTimer(secondsRemaining)
 
-                //timerProgressBar.progress = secondsRemaining.toInt()
-                //println("Callling the 2 funcs")
-//                updateCircularTimer(secondsRemaining)
-//                updateProgressBar(secondsRemaining)
             }
 
             override fun onFinish() {
                 // Move to Screen 3
                 startActivity(Intent(this@SecondActivity,ThirdActivity::class.java))
+                stopCamera()
                 finish()
             }
         }.start()
 
 
 
-        /*
-        progressBar.visibility = View.VISIBLE
-        timerRunnable = object : Runnable {
-            override fun run() {
-                if (timerSeconds > 0) {
-                    timerSeconds -= 5
-                    progressBar.progress = (timerSeconds * 100) / 300
-                    val remainingSeconds = timerSeconds
-                    timerTextView.text = "$remainingSeconds seconds left"
-
-
-                    timerHandler.postDelayed(this, 5000)
-                } else {
-                    progressBar.visibility = View.GONE
-                    statusTextView.text = "Timer Finished"
-                    goToScreen3()
-                }
-            }
-        }
-        timerHandler.postDelayed(timerRunnable!!, 5000)
-        */
     }
 
     private fun stopTimer() {
@@ -259,24 +236,14 @@ class SecondActivity : AppCompatActivity(), SurfaceHolder.Callback, Camera.Pictu
         val percentageElapsed = ((300 - secondsRemaining) / 300f) * 100
         val roundedPercentage = "%.2f".format(percentageElapsed)
 
-        // Update the circular timer
-        timerTextView.text = "${secondsRemaining}s"
+        // Update the timer
+        timerTextView.text = "${secondsRemaining}s left"
         timerTextView.setTextColor(ContextCompat.getColor(this, R.color.purple_500))
         timerProgressBar.progress = percentageElapsed.toInt()
         percentTextview.text = "${roundedPercentage} %"
     }
 
-    private fun updateProgressBar(secondsRemaining: Long) {
-        // Update the progress bar
-        timerProgressBar.progress = secondsRemaining.toInt()
-    }
-
-    private fun goToScreen3() {
-        val intent = Intent(this, ThirdActivity::class.java)
-        startActivity(intent)
-        finish()
-    }
-
+    //Function to get a file where image data is ultimately stored.
     private fun getOutputMediaFile(): File? {
         val mediaStorageDir = File(
             Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES),
@@ -287,9 +254,8 @@ class SecondActivity : AppCompatActivity(), SurfaceHolder.Callback, Camera.Pictu
                 return null
             }
         }
-
         val timeStamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
-        return File("${mediaStorageDir.path}${File.separator}IMG_${timeStamp}.jpg")
+        return File(mediaStorageDir.path + File.separator + "IMG_" + timeStamp + "EV" + currentExposureValue +".jpg")
     }
 }
 

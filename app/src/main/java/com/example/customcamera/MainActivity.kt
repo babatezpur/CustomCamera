@@ -2,6 +2,7 @@ package com.example.customcamera
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
@@ -15,11 +16,12 @@ class MainActivity : AppCompatActivity() {
     lateinit var editTextEmail : EditText
     lateinit var buttonTakeTest : Button
 
-    val database : FirebaseDatabase = FirebaseDatabase.getInstance()
-    val reference : DatabaseReference = database.reference.child("UserData")
-    val oldReference : DatabaseReference = database.reference.child("UserData")
 
-    //@SuppressLint("MissingInflatedId")
+    //Firebase reference to access the db
+    private val database : FirebaseDatabase = FirebaseDatabase.getInstance()
+    private val reference : DatabaseReference = database.reference.child("UserData")
+    private val oldReference : DatabaseReference = database.reference.child("UserData")
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -27,8 +29,6 @@ class MainActivity : AppCompatActivity() {
         editTextName = findViewById(R.id.editTextName)
         editTextEmail = findViewById(R.id.editTextEmail)
         buttonTakeTest = findViewById(R.id.buttonTakeTest)
-
-
 
         oldReference.addListenerForSingleValueEvent(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
@@ -45,22 +45,31 @@ class MainActivity : AppCompatActivity() {
                 }
 
                 override fun onCancelled(error: DatabaseError) {
-                    TODO("Not yet implemented")
+                    Log.d("MainActivity" , "Connectedtion with Firebase interrupted")
                 }
             })
 
-
         buttonTakeTest.setOnClickListener {
+            if(editTextName.text.isEmpty() or editTextEmail.text.isEmpty()){
+                Toast.makeText(applicationContext, "Name and Email can't be empty" , Toast.LENGTH_LONG).show()
+            }else if(!isValidEmail(editTextEmail.text.toString())){
+                Toast.makeText(applicationContext,"Please enter valid email",Toast.LENGTH_LONG).show()
+            }else {
+                val userName = editTextName.text.toString()
+                val userEmail = editTextEmail.text.toString()
 
-            val userName = editTextName.text.toString()
-            val userEmail = editTextEmail.text.toString()
+                reference.child("Name").setValue(userName)
+                reference.child("Email").setValue(userEmail)
 
-            reference.child("Name").setValue(userName)
-            reference.child("Email").setValue(userEmail)
-
-            val intent = Intent(this@MainActivity , SecondActivity::class.java)
-            startActivity(intent)
+                val intent = Intent(this@MainActivity, SecondActivity::class.java)
+                startActivity(intent)
+            }
         }
 
+    }
+    //Function to check email validity
+    private fun isValidEmail(email: String): Boolean {
+        val emailRegex = Regex(pattern = "^[A-Za-z](.*)([@]{1})(.{1,})(\\.)(.{1,})")
+        return emailRegex.matches(email)
     }
 }
